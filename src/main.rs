@@ -125,6 +125,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/login", post(login))
         .with_state(state);
 
+    println!("Testing web server initialization");
+
     // Run server (TLS 1.3 in production)
     axum::Server::bind(&"127.0.0.1:8080".parse()?)
         .serve(app.into_make_service())
