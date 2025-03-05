@@ -9,6 +9,8 @@
     <p>{{ message }}</p>
     <form method="POST" action="/login">
         <input type="text" name="digital_id" placeholder="Digital ID">
+        <input type="text" name="signature" placeholder="Signature (base64)">
+        <input type="hidden" name="nonce" value="{{ nonce }}">
         <button type="submit">Login</button>
     </form>
 </body>
