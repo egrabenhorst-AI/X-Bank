@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>X Bank Register</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'">
+</head>
+<body>
+    <h1>X Bank Register</h1>
+    <p>{{ message }}</p>
+    <form method="POST" action="/register">
+        <input type="text" name="digital_id" placeholder="Digital ID (base64 public key)">
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
