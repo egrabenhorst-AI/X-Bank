@@ -1,10 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>X Bank</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X Bank - Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #28a745;
+        }
+        p {
+            color: #333;
+            word-break: break-all;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ message }}</h1>
+    <div class="container">
+        <h1>Success</h1>
+        <p>{{ message }}</p>
+        <p><a href="/">Back to Register</a> | <a href="/login">Login Again</a> | <a href="/account">View Account</a></p>
+    </div>
 </body>
 </html>

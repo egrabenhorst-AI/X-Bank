@@ -2,7 +2,7 @@ use axum::{
     routing::{get, post},
     Router,
     response::Html,
-    extract::{State, Form},
+    extract::{State, Form, Query},
     http::{StatusCode, header},
 };
 use askama::Template;
@@ -13,9 +13,9 @@ use sha2::{Sha256, Digest};
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::VecDeque;
-use ring::signature::{self, KeyPair};
+use ring::signature::{self, KeyPair, Ed25519KeyPair};
 use ring::rand::SystemRandom;
-use rand::{thread_rng, Rng}; // Added Rng trait import
+use rand::{thread_rng, Rng};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 
@@ -30,7 +30,7 @@ impl HSM {
         let rng = SystemRandom::new();
         let keypair_doc = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
         let keypair = signature::Ed25519KeyPair::from_pkcs8(keypair_doc.as_ref()).unwrap();
-        let private_key = keypair_doc.as_ref(); // PKCS#8 includes private key
+        let private_key = keypair_doc.as_ref();
         let public_key = keypair.public_key().as_ref();
 
         let encoding_key = EncodingKey::from_ed_der(private_key);
@@ -42,29 +42,29 @@ impl HSM {
         }
     }
 
-    // fn sign(&self, data: &[u8]) -> Vec<u8> {
-    //     let mut hasher = Sha256::new();
-    //     hasher.update(data);
-    //     hasher.finalize().to_vec()
-    // }
+    fn sign(&self, data: &[u8]) -> Vec<u8> {
+        let mut hasher = Sha256::new();
+        hasher.update(data);
+        hasher.finalize().to_vec()
+    }
 }
 
-// Application state
+// Application state with dummy keypair
 struct AppState {
     hsm: HSM,
-    log: Mutex<VecDeque<String>>, // Immutable log for transparency
+    log: Mutex<VecDeque<String>>,
     users: Mutex<Vec<User>>,
+    dummy_keypair: Ed25519KeyPair, // Store the dummy keypair
 }
 
-// User data structure
 #[derive(Clone)]
 struct User {
-    id: String, // Base64-encoded Ed25519 public key
+    id: String,
     balance: f64,
     summary: String,
 }
 
-// Templates for server-side rendering
+// Templates
 #[derive(Template)]
 #[template(path = "register.html")]
 struct RegisterTemplate {
@@ -91,7 +91,7 @@ struct AccountTemplate {
     summary: String,
 }
 
-// Request and JWT claims structs
+// Request structs
 #[derive(Deserialize)]
 struct RegisterRequest {
     digital_id: String,
@@ -104,13 +104,17 @@ struct LoginRequest {
     nonce: String,
 }
 
+#[derive(Deserialize)]
+struct SignRequest {
+    nonce: String,
+}
+
 #[derive(Serialize, Deserialize)]
 struct Claims {
     sub: String,
     exp: u64,
 }
 
-// Registration handler
 async fn register(
     State(state): State<std::sync::Arc<AppState>>,
     Form(form): Form<RegisterRequest>,
@@ -149,7 +153,6 @@ async fn register(
     Ok(Html(template.render().unwrap()))
 }
 
-// Login handler
 async fn login(
     State(state): State<std::sync::Arc<AppState>>,
     Form(form): Form<LoginRequest>,
@@ -186,8 +189,7 @@ async fn login(
         &Header::new(Algorithm::EdDSA),
         &token_data,
         &state.hsm.encoding_key,
-    )
-    .unwrap();
+    ).unwrap();
 
     let log_entry = format!("User {} logged in at {}", user.id, token_data.exp);
     state
@@ -202,7 +204,6 @@ async fn login(
     Ok(Html(template.render().unwrap()))
 }
 
-// Account viewing handler
 async fn account(
     State(state): State<std::sync::Arc<AppState>>,
     headers: axum::http::HeaderMap,
@@ -243,7 +244,6 @@ async fn account(
     Ok(Html(template.render().unwrap()))
 }
 
-// Page rendering handlers
 async fn register_page(State(_state): State<std::sync::Arc<AppState>>) -> Html<String> {
     let template = RegisterTemplate {
         message: "Create a new account with your digital ID (base64-encoded public key)".to_string(),
@@ -252,7 +252,8 @@ async fn register_page(State(_state): State<std::sync::Arc<AppState>>) -> Html<S
 }
 
 async fn login_page(State(_state): State<std::sync::Arc<AppState>>) -> Html<String> {
-    let nonce = STANDARD.encode(thread_rng().gen::<[u8; 32]>()); // gen works with Rng in scope
+    let nonce = STANDARD.encode(thread_rng().gen::<[u8; 32]>());
+    println!("Login nonce: {}", nonce);
     let template = LoginTemplate {
         message: "Enter your digital ID and signature".to_string(),
         nonce,
@@ -260,7 +261,19 @@ async fn login_page(State(_state): State<std::sync::Arc<AppState>>) -> Html<Stri
     Html(template.render().unwrap())
 }
 
-// Main function
+// Debug endpoint to generate a signature for the dummy user
+async fn sign_nonce(
+    State(state): State<std::sync::Arc<AppState>>,
+    Query(query): Query<SignRequest>,
+) -> Result<String, (StatusCode, String)> {
+    let nonce_bytes = STANDARD
+        .decode(&query.nonce)
+        .map_err(|_| (StatusCode::BAD_REQUEST, "Invalid nonce encoding".to_string()))?;
+    let signature = state.dummy_keypair.sign(&nonce_bytes);
+    let base64_signature = STANDARD.encode(signature.as_ref());
+    Ok(base64_signature)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hsm = HSM::new();
@@ -272,14 +285,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let public_key = keypair.public_key().as_ref();
     let id = STANDARD.encode(public_key);
 
+    println!("Dummy user digital_id: {}", id);
+
     let state = std::sync::Arc::new(AppState {
         hsm,
         log: Mutex::new(VecDeque::new()),
         users: Mutex::new(vec![User {
-            id,
+            id: id.clone(),
             balance: 100.0,
             summary: "Initial account".to_string(),
         }]),
+        dummy_keypair: keypair, // Store the keypair in AppState
     });
 
     let app = Router::new()
@@ -287,6 +303,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/register", post(register))
         .route("/login", get(login_page).post(login))
         .route("/account", get(account))
+        .route("/sign", get(sign_nonce)) // New debug endpoint
         .with_state(state);
 
     axum::Server::bind(&"127.0.0.1:8080".parse()?)
