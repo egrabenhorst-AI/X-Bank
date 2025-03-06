@@ -1,12 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>X Bank Account</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X Bank - Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .info p {
+            margin: 0.5rem 0;
+            color: #333;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Account</h1>
-    <p>Balance: ${{ balance }}</p>
-    <p>Summary: {{ summary }}</p>
+    <div class="container">
+        <h1>Your Account</h1>
+        <div class="info">
+            <p><strong>Balance:</strong> {{ balance }}</p>
+            <p><strong>Summary:</strong> {{ summary }}</p>
+        </div>
+        <a href="/">Back to Register</a>
+    </div>
 </body>
 </html>
