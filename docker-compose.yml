@@ -1,0 +1,25 @@
+services:
+  account-service:
+    build:
+      context: ./account-service
+      args:
+        DATABASE_URL: postgres://user:password@db:5432/xbank
+    environment:
+      DATABASE_URL: postgres://user:password@db:5432/xbank
+    depends_on:
+      - db
+    networks:
+      - backend
+    ports:
+      - "3001:3001"
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: xbank
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge
