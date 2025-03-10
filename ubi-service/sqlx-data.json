@@ -1,0 +1,59 @@
+{
+  "db": "PostgreSQL",
+  "714d10cb76076a8c10d147a14bfda609e7d809186b602406b671d4dd79a0ca8e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "balance",
+          "ordinal": 2,
+          "type_info": "Float8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM accounts"
+  },
+  "d35043ff46285958cddb299b74408bc1a4bd39799ed1564c1af8e7a0db1a0096": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Float8"
+        ]
+      }
+    },
+    "query": "INSERT INTO transactions (account_id, amount, kind) VALUES ($1, $2, 'ubi')"
+  },
+  "fc7048366393b1cccbfd1850ba9c01f7957b789b4b51dc2ad8dca5db56976496": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Float8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET balance = balance + $1 WHERE id = $2"
+  }
+}

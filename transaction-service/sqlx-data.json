@@ -1,0 +1,38 @@
+{
+  "db": "PostgreSQL",
+  "317260052ea318fa7c7e3dc9349730da16e4366ff275333ea8ef761c7f74cbfb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Float8",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO transactions (account_id, amount, kind) VALUES ($1, $2, $3) RETURNING id"
+  },
+  "fc7048366393b1cccbfd1850ba9c01f7957b789b4b51dc2ad8dca5db56976496": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Float8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET balance = balance + $1 WHERE id = $2"
+  }
+}

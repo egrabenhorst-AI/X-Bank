@@ -1,0 +1,10 @@
+[package]
+name = "audit-service"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+serde = { version = "1", features = ["derive"] }
+sqlx = { version = "0.6", features = ["runtime-actix-native-tls", "sqlite", "offline"] }
+sha2 = "0.10"

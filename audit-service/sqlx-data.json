@@ -1,0 +1,13 @@
+{
+  "db": "SQLite",
+  "21cb6960cd29345d24f99e46368822498129ec254ac8bdd54941357ad107ab94": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 4
+      }
+    },
+    "query": "INSERT INTO audit_logs (action, user_id, timestamp, hash) VALUES ($1, $2, $3, $4)"
+  }
+}
